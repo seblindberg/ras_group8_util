@@ -1,3 +1,2 @@
-# RAS Group 8 Template
+# RAS Group 8 Utilities
 
-Template used for new packages. The structure is in large part inspired by [this repository](https://github.com/ethz-asl/ros_best_practices).

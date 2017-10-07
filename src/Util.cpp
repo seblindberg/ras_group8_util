@@ -1,11 +1,11 @@
-#include <ras_group8_template/Template.hpp>
+#include <ras_group8_template/Util.hpp>
 
 // STD
 #include <string>
 
 namespace ras_group8_template {
 
-Template::Template(ros::NodeHandle& nodeHandle)
+Util::Util(ros::NodeHandle& nodeHandle)
     : nodeHandle_(nodeHandle)
 {
   if (!readParameters()) {
@@ -14,22 +14,22 @@ Template::Template(ros::NodeHandle& nodeHandle)
   }
   
   subscriber_ = nodeHandle_.subscribe(subscriberTopic_, 1,
-                                      &Template::topicCallback, this);
+                                      &Util::topicCallback, this);
 
   ROS_INFO("Successfully launched node.");
 }
 
-Template::~Template()
+Util::~Util()
 {
 }
 
-bool Template::readParameters()
+bool Util::readParameters()
 {
   if (!nodeHandle_.getParam("subscriber_topic", subscriberTopic_)) return false;
   return true;
 }
 
-void Template::topicCallback(const phidgets::motor_encoder& msg)
+void Util::topicCallback(const phidgets::motor_encoder& msg)
 {
 }
 
