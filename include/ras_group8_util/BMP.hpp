@@ -23,8 +23,8 @@ public:
     write(const nav_msgs::OccupancyGrid& grid, FILE *f);
 
 private:
-  BMP();
-  virtual ~BMP();
+  BMP() {};
+  virtual ~BMP() {};
 };
 
 } /* namespace */
