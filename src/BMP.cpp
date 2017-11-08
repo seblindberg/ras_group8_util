@@ -6,9 +6,9 @@
 
 namespace ras_group8_util {
   
-#define BMP_FILE_HEADER_SIZE  14
-#define BMP_INFO_HEADER_SIZE  40
-#define BMP_COLOR_TABLE_SIZE  (4 * 0xFF)
+#define BMP_FILE_HEADER_SIZE  (14)
+#define BMP_INFO_HEADER_SIZE  (40)
+#define BMP_COLOR_TABLE_SIZE  (4 * 256)
 #define BMP_PIXEL_DATA_OFFSET (BMP_FILE_HEADER_SIZE + \
                                BMP_INFO_HEADER_SIZE + \
                                BMP_COLOR_TABLE_SIZE)
@@ -33,10 +33,13 @@ bmp_result_t BMP::write(const nav_msgs::OccupancyGrid& grid, FILE *f)
     return BMP_INVALID_FILE_HANDLE;
   }
     
-  { /* Write file size */
-    int* filesize = (int *)&bmp_file_header[2];
-    *filesize = BMP_PIXEL_DATA_OFFSET +
+  { /* Write raw pixel data size and file size */
+    int* info_raw_data_size = (int *)&bmp_info_header[20];
+    *info_raw_data_size =
       (grid.info.width + row_padding_len) * grid.info.height;
+    
+    int* filesize = (int *)&bmp_file_header[2];
+    *filesize = BMP_PIXEL_DATA_OFFSET + *info_raw_data_size;
   }
   
   { /* Write pixel offset (not strictly required) */
