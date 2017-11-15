@@ -1,4 +1,5 @@
 #include <ras_group8_util/BMP.hpp>
+#include <ros/ros.h>
 
 // STD
 #include <string>
@@ -70,7 +71,7 @@ bmp_result_t BMP::write(const nav_msgs::OccupancyGrid& grid, FILE *f)
   fwrite(bmp_info_header, 1, BMP_INFO_HEADER_SIZE, f);
   
   /* Write color table (mandatory for bit depth <= 8) */
-  for (r = 0; r < 0xFF; r ++) {
+  for (r = 0; r <= 0xFF; r ++) {
     color_table_entry[0] = r;
     color_table_entry[1] = r;
     color_table_entry[2] = r;
@@ -83,6 +84,9 @@ bmp_result_t BMP::write(const nav_msgs::OccupancyGrid& grid, FILE *f)
     fwrite(&grid.data[r * width], 1, width, f);
     fwrite(row_padding, 1, row_padding_len, f);
   }
+  
+  /* Append a single dummy byte */
+  fwrite(row_padding, 1, 1, f);
   
   return BMP_OK;
 }
@@ -159,8 +163,10 @@ bmp_result_t BMP::read(nav_msgs::OccupancyGrid* const grid, FILE *f)
   }
   
   { /* Verify the integrity of the pixel data */
-    int* filesize = (int *)&bmp_file_header[2];
-    if (*filesize != actual_filesize) {
+    int* filesize = (int *) &bmp_file_header[2];
+    if (*filesize > actual_filesize) {
+      ROS_INFO("actual_filesize = %u", actual_filesize);
+      ROS_INFO("*filesize = %u", *filesize);
       return BMP_INVALID_FILE_SIZE;
     }
     
@@ -176,10 +182,11 @@ bmp_result_t BMP::read(nav_msgs::OccupancyGrid* const grid, FILE *f)
     
     fseek(f, *pixel_offset, SEEK_SET);
   }
-  
+    
   for (r = 0; r < height; r ++) {
     bytes_read = fread(&grid->data[r * width], 1, width, f);
     if (bytes_read != width) {
+      ROS_ERROR("Failed to read row %u (%u)", r, bytes_read);
       return BMP_READ_ERROR;
     }
     
